@@ -5,7 +5,13 @@ export const TemplateTwo = () => {
   const { activeResume } = useResume();
 
   return (
-    <div className="resume-template template2">
+    <div
+      className="resume-template template2"
+      style={{
+        backgroundColor: "white",
+        color: "black",
+      }}
+    >
       <header className="resume-header">
         <div className="header-left">
           <h1>{activeResume.personalInfo.fullName}</h1>

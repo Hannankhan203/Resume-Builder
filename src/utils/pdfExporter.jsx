@@ -5,44 +5,68 @@ export const exportToPDF = async (elementId, settings) => {
   const element = document.getElementById(elementId);
   if (!element) return;
 
-  const originalStyles = {
-    position: element.style.position,
-    overflow: element.style.overflow,
-    height: element.style.height,
-    width: element.style.width,
-  };
+  // Create a clean clone of the element
+  const clone = element.cloneNode(true);
+  clone.id = "pdf-export-clone";
 
-  element.style.position = "absolute";
-  element.style.overflow = "visible";
-  element.style.height = "auto";
-  element.style.width = "800px";
+  // Apply necessary styles to the clone
+  clone.style.position = "absolute";
+  clone.style.left = "-9999px";
+  clone.style.top = "0";
+  clone.style.width = "800px";
+  clone.style.height = "auto";
+  clone.style.visibility = "visible";
+  clone.style.background = "#ffffff";
+  clone.style.color = "#000000";
 
-  const canvas = await html2canvas(element, {
-    scale: 1,
-    logging: false,
-    useCORS: true,
-    scrollX: 0,
-    scrollY: 0,
-    windowWidth: element.scrollWidth,
-    windowHeight: element.scrollHeight,
-    letterRendering: true,
+  // Find and modify all child elements to ensure white background
+  const allElements = clone.querySelectorAll("*");
+  allElements.forEach((el) => {
+    el.style.background = "#ffffff";
+    el.style.color = "#000000";
+    el.style.boxShadow = "none";
   });
 
-  Object.assign(element.style, originalStyles);
+  document.body.appendChild(clone);
 
-  const pdf = new jsPDF({
-    orientation: settings.orientation || "portrait",
-    unit: "mm",
-    format: settings.format || "a4",
-  });
+  // Small delay to ensure rendering
+  await new Promise((resolve) => setTimeout(resolve, 100));
 
-  const imgWidth = 190; // mm (A4 width - margins)
-  const imgHeight = (canvas.height * imgWidth) / canvas.width;
+  try {
+    const canvas = await html2canvas(clone, {
+      scale: 2,
+      logging: true,
+      useCORS: true,
+      backgroundColor: "#ffffff",
+      letterRendering: true,
+      removeContainer: true,
+      onclone: (document) => {
+        // Ensure all elements have white background in the cloned document
+        document.querySelectorAll("*").forEach((el) => {
+          el.style.background = "#ffffff";
+          el.style.color = "#000000";
+        });
+      },
+    });
 
-  // const imgProps = pdf.getImageProperties(imgData);
-  // const pdfWidth = pdf.internal.pageSize.getWidth();
-  // const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+    const pdf = new jsPDF({
+      orientation: settings.orientation || "portrait",
+      unit: "mm",
+      format: settings.format || "a4",
+    });
 
-  pdf.addImage(canvas, "PNG", 10, 10, imgWidth, imgHeight);
-  pdf.save(`${settings.fileName || "resume"}.pdf`);
+    const imgWidth = pdf.internal.pageSize.getWidth() - 20;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    pdf.addImage(canvas, "PNG", 10, 10, imgWidth, imgHeight);
+    pdf.save(`${settings.fileName || "resume"}.pdf`);
+  } catch (error) {
+    console.error("PDF generation error:", error);
+  } finally {
+    // Always clean up
+    const cloneToRemove = document.getElementById("pdf-export-clone");
+    if (cloneToRemove) {
+      document.body.removeChild(cloneToRemove);
+    }
+  }
 };

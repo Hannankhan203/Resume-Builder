@@ -12,7 +12,10 @@ export const ResumePreview = () => {
         return <TemplateTwo />;
       default:
         return (
-          <div className="resume-template template1" style={{ width: '800px' }}>
+          <div
+            className="resume-template template1"
+            style={{ width: "800px", backgroundColor: "#fff" }}
+          >
             <header className="resume-header">
               <h1>{activeResume.personalInfo.fullName}</h1>
               <div className="contact-info">
@@ -99,11 +102,21 @@ export const ResumePreview = () => {
   };
 
   return (
-    <div className="resume-preview-container">
+    <div
+      className="resume-preview-container"
+      style={{ backgroundColor: "#f5f5f5", padding: "20px" }}
+    >
       <div className="preview-controls">
         <PDFExportButton />
       </div>
-      <div id="resume-preview" className="resume-preview">
+      <div
+        id="resume-preview"
+        className="resume-preview"
+        style={{
+          backgroundColor: "white",
+          color: "black",
+        }}
+      >
         {renderTemplate()}
       </div>
     </div>
