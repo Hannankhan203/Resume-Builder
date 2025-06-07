@@ -1,92 +1,5 @@
 import { jsPDF } from "jspdf";
-import html2canvas from "html2canvas";
 
-export const exportToPDF = async (elementId, settings) => {
-  const element = document.getElementById(elementId);
-  if (!element) return;
-
-  // Create a print-optimized clone with exact dimensions
-  const clone = element.cloneNode(true);
-  clone.id = "pdf-export-clone";
-
-  // Apply compact styling
-  clone.style.cssText = `
-    position: absolute;
-    left: px;
-    width: 110mm; 
-    min-height: auto;
-    padding-right: 20mm;
-    margin: 0;
-    background: white;
-    color: black;
-    box-sizing: border-box;
-    font-size: 11pt;
-    line-height: 1;
-  `;
-
-  document.body.appendChild(clone);
-
-  try {
-    const canvas = await html2canvas(clone, {
-      scale: 2,
-      width: clone.scrollWidth,
-      height: clone.scrollHeight,
-      logging: true,
-      useCORS: true,
-      backgroundColor: "#ffffff",
-      letterRendering: true,
-      onclone: (clonedDoc) => {
-        clonedDoc.body.style.background = "white";
-      },
-    });
-
-    const pdf = new jsPDF({
-      orientation: "portrait",
-      unit: "mm",
-      format: "a4",
-    });
-
-    // Calculate dynamic height based on content
-    const imgWidth = 200; // mm
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-    // Multi-page support
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    let remainingHeight = imgHeight;
-    // let position = 0;
-    let pageNum = 0;
-    while (remainingHeight > 0) {
-      if (pageNum > 0) pdf.addPage();
-      const sliceHeight = Math.min(remainingHeight, pageHeight);
-      // Calculate the portion of the canvas to use for this page
-      const sourceY = (imgHeight - remainingHeight) * (canvas.height / imgHeight);
-      const sourceHeight = sliceHeight * (canvas.height / imgHeight);
-      // Create a temporary canvas for the slice
-      const pageCanvas = document.createElement('canvas');
-      pageCanvas.width = canvas.width;
-      pageCanvas.height = sourceHeight;
-      const ctx = pageCanvas.getContext('2d');
-      ctx.drawImage(
-        canvas,
-        0, sourceY, canvas.width, sourceHeight, // source
-        0, 0, canvas.width, sourceHeight        // destination
-      );
-      const imgData = pageCanvas.toDataURL('image/png');
-      pdf.addImage(imgData, 'PNG', 10, 0, imgWidth, sliceHeight);
-      remainingHeight -= sliceHeight;
-      pageNum++;
-    }
-
-    pdf.save(`${settings.fileName || "resume"}.pdf`);
-  } catch (error) {
-    console.error("PDF generation error:", error);
-  } finally {
-    const cloneToRemove = document.getElementById("pdf-export-clone");
-    if (cloneToRemove) document.body.removeChild(cloneToRemove);
-  }
-};
-
-// New: Direct jsPDF export (no html2canvas, no image slicing)
 export const exportToPDFjsPDFOnly = (resume, settings = {}) => {
   const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
   const pageWidth = pdf.internal.pageSize.getWidth();
@@ -155,7 +68,7 @@ export const exportToPDFjsPDFOnly = (resume, settings = {}) => {
     pdf.setFontSize(11);
     const summaryLines = pdf.splitTextToSize(resume.summary, leftColWidth);
     pdf.text(summaryLines, leftX, y);
-    y += lineHeight * summaryLines.length - 8;
+    y += lineHeight * summaryLines.length - 6;
   }
   if (resume.education && resume.education.length) {
     addSectionHeader('Education');
@@ -171,7 +84,28 @@ export const exportToPDFjsPDFOnly = (resume, settings = {}) => {
       if (edu.description) {
         const eduDescLines = pdf.splitTextToSize(edu.description, leftColWidth);
         pdf.text(eduDescLines, leftX, y);
-        y += lineHeight * eduDescLines.length - 1000;
+        y += lineHeight * eduDescLines.length;
+      }
+      y += subSectionSpacing;
+    });
+    y += sectionSpacing;
+  }
+  // Add Experience section
+  if (resume.experience && resume.experience.length) {
+    addSectionHeader('Experience');
+    resume.experience.forEach(exp => {
+      addSubHeader(exp.company, leftX, y);
+      y += lineHeight - 1.5;
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(10);
+      pdf.text(`${exp.startDate} - ${exp.endDate}`, leftX, y);
+      y += lineHeight - 2.5;
+      pdf.text(exp.position, leftX, y);
+      y += lineHeight - 1.5;
+      if (exp.description) {
+        const expDescLines = pdf.splitTextToSize(exp.description, leftColWidth);
+        pdf.text(expDescLines, leftX, y);
+        y += lineHeight * expDescLines.length;
       }
       y += subSectionSpacing;
     });
@@ -197,11 +131,19 @@ export const exportToPDFjsPDFOnly = (resume, settings = {}) => {
     yRight += lineHeight - 2.5;
   }
   if (resume.personalInfo.email) {
-    addLink('Contact via Email', `mailto:${resume.personalInfo.email}`, rightX, yRight);
+    pdf.text(resume.personalInfo.email, rightX, yRight, { maxWidth: rightColWidth });
     yRight += lineHeight - 2.5;
   }
   if (resume.personalInfo.portfolio) {
     addLink('Portfolio', resume.personalInfo.portfolio, rightX, yRight);
+    yRight += lineHeight - 2.5;
+  }
+  if (resume.personalInfo.github) {
+    addLink('GitHub', resume.personalInfo.github, rightX, yRight);
+    yRight += lineHeight - 2.5;
+  }
+  if (resume.personalInfo.linkedIn) {
+    addLink('LinkedIn', resume.personalInfo.linkedIn, rightX, yRight);
     yRight += lineHeight - 2.5;
   }
   yRight += sectionSpacing + 2;
@@ -213,7 +155,7 @@ export const exportToPDFjsPDFOnly = (resume, settings = {}) => {
     resume.skills.forEach(skill => {
       const skillLines = pdf.splitTextToSize(skill, rightColWidth);
       pdf.text(skillLines, rightX, skillsY);
-      skillsY += lineHeight * skillLines.length;
+      skillsY += lineHeight * skillLines.length - 1;
     });
     yRight = skillsY + sectionSpacing;
   }
@@ -228,13 +170,10 @@ export const exportToPDFjsPDFOnly = (resume, settings = {}) => {
     });
     yRight = certY + sectionSpacing;
   }
-  // PROJECTS SECTION: Start on current page if space, otherwise add page as needed
   if (resume.projects && resume.projects.length) {
-    // Only add the section header if at least one project fits on the current page
     let projectsHeaderAdded = false;
     resume.projects.forEach((project, idx) => {
-      // Estimate height for this project
-      let projLines = 1; // name
+      let projLines = 1;
       if (project.technologies && project.technologies.length) {
         const techLine = `Tech Used - ${project.technologies.join(', ')}`;
         projLines += pdf.splitTextToSize(techLine, leftColWidth).length;
@@ -242,7 +181,6 @@ export const exportToPDFjsPDFOnly = (resume, settings = {}) => {
       if (project.link) projLines += 1;
       if (project.description) projLines += pdf.splitTextToSize(project.description, leftColWidth).length;
       const projHeight = lineHeight * projLines + subSectionSpacing;
-      // If not enough space for this project, add a new page
       if (y + projHeight > pageHeight - 18) {
         pdf.addPage();
         y = 22;
@@ -260,7 +198,7 @@ export const exportToPDFjsPDFOnly = (resume, settings = {}) => {
         const techLine = `Tech Used - ${project.technologies.join(', ')}`;
         const techLines = pdf.splitTextToSize(techLine, leftColWidth);
         pdf.text(techLines, leftX, y);
-        y += lineHeight * techLines.length;
+        y += lineHeight * techLines.length - 2;
       }
       if (project.link) {
         addLink(project.link, project.link, leftX, y);

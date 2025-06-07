@@ -56,7 +56,6 @@ Click the sun/moon icon in the header to toggle dark mode.
 
 ## Tech Stack
 - **Frontend:** React (with Context API for state management)
-- **PDF Generation:** jsPDF, html2canvas
 - **Drag-and-Drop:** @hello-pangea/dnd
 - **Styling:** CSS
 

@@ -1,25 +1,14 @@
 import React from "react";
 import { useResume } from "../contexts/ResumeContext";
-import { exportToPDF, exportToPDFjsPDFOnly } from "../utils/pdfExporter";
+import { exportToPDFjsPDFOnly } from "../utils/pdfExporter";
 
 const PDFExportButton = () => {
   const { activeResume } = useResume();
 
-  const handleExport = () => {
-    exportToPDF("resume-preview", {
-      ...activeResume.pdfSettings,
-      fileName: activeResume.pdfSettings.fileName || activeResume.name,
-      personalInfo: activeResume.personalInfo,
-    });
-  };
-
   return (
     <>
-      <button onClick={handleExport} className="pdf-export-button">
-        Export to PDF (Image)
-      </button>
       <button onClick={() => exportToPDFjsPDFOnly(activeResume)} className="pdf-export-button">
-        Export to PDF (jsPDF Only)
+        Export to PDF
       </button>
     </>
   );
