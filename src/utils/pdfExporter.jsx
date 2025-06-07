@@ -88,265 +88,195 @@ export const exportToPDF = async (elementId, settings) => {
 
 // New: Direct jsPDF export (no html2canvas, no image slicing)
 export const exportToPDFjsPDFOnly = (resume, settings = {}) => {
-  const pdf = new jsPDF({
-    orientation: "portrait",
-    unit: "mm",
-    format: "a4",
-  });
+  const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
-  let y = 20;
-  const leftMargin = 20;
-  const rightMargin = 20;
-  const contentWidth = pageWidth - leftMargin - rightMargin;
-  const lineHeight = 8;
-  const sectionSpacing = 10;
-  const cardSpacing = 2;
-  const underlineSpacing = 6; // Space after section underline before content
-  const bottomPadding = 5;
 
-  // Helper: Add section title
-  function addSectionTitle(title) {
-    pdf.setFontSize(15);
+  // Layout
+  const leftX = 12;
+  const rightX = pageWidth * 0.65 + 6; // Sidebar starts at ~65% + gap
+  const leftColWidth = rightX - leftX - 8;
+  const rightColWidth = pageWidth - rightX - 10;
+  let y = 22;
+  const lineHeight = 6.2;
+  const sectionSpacing = 6;
+  const subSectionSpacing = 2;
+  const blue = [41, 76, 139];
+  const black = [0, 0, 0];
+
+  // Helper: Blue all-caps section header
+  function addSectionHeader(title, col = 'left', yOverride = null) {
+    const x = col === 'left' ? leftX : rightX;
+    let headerY = yOverride !== null ? yOverride : (col === 'left' ? y : yRight);
     pdf.setFont('helvetica', 'bold');
-    pdf.text(title, leftMargin, y);
-    y += underlineSpacing; // Small gap after heading
-    pdf.setDrawColor(41, 128, 185);
-    pdf.setLineWidth(1);
-    pdf.line(leftMargin, y, pageWidth - rightMargin, y);
-    y += underlineSpacing; // Equal gap after line
     pdf.setFontSize(11);
+    pdf.setTextColor(...blue);
+    pdf.text(title.toUpperCase(), x, headerY);
+    if (col === 'left') {
+      y = headerY + lineHeight - 2;
+    } else {
+      yRight = headerY + lineHeight - 2;
+    }
     pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(11);
+    pdf.setTextColor(...black);
   }
 
-  // Helper: Add a card (for education, experience, projects)
-  function addCard({ title, subtitle, description, tags, link }) {
-    const cardTop = y;
-    const cardPadding = 2;
-    let cardHeight = 18 + (description ? 7 : 0);
-    // Calculate tag lines and height
-    let tagLines = 0;
-    if (tags && tags.length) {
-      let tagX = leftMargin + 3;
-      // let tagY = 0;
-      tagLines = 1;
-      tags.forEach(tag => {
-        const tagWidth = pdf.getTextWidth(tag) + 6;
-        if (tagX + tagWidth > leftMargin + contentWidth - 3) {
-          tagX = leftMargin + 3;
-          tagLines++;
-        }
-        tagX += tagWidth + 2;
-      });
-      cardHeight += tagLines * 10;
-    }
-    // Before drawing the card, check if it fits on the current page
-    if (y + cardHeight > pageHeight - 25) {
-      pdf.addPage();
-      y = 25;
-    }
-    pdf.setDrawColor(41, 128, 185);
-    pdf.setLineWidth(1);
-    pdf.setFillColor(245, 245, 245);
-    pdf.roundedRect(leftMargin, y, contentWidth, cardHeight, 4, 4, 'FD');
-    y += cardPadding + 5;
+  // Helper: Add a blue underlined link
+  function addLink(text, url, x, y) {
+    pdf.setTextColor(...blue);
+    pdf.textWithLink(text, x, y, { url });
+    pdf.setTextColor(...black);
+  }
+
+  // Helper: Add a bold subheader
+  function addSubHeader(text, x, y) {
     pdf.setFont('helvetica', 'bold');
-    pdf.setFontSize(13);
-    pdf.text(title, leftMargin + 3, y);
-    if (link) {
-      pdf.setTextColor(41, 128, 185);
-      pdf.textWithLink(link, leftMargin + 3, y + 6, { url: link });
-      pdf.setTextColor(0, 0, 0);
-    }
-    if (subtitle) {
-      pdf.setFont('helvetica', 'normal');
-      pdf.setFontSize(11);
-      pdf.text(subtitle, leftMargin + 3, y + 6);
-    }
-    if (description) {
-      pdf.setFont('helvetica', 'normal');
-      pdf.setFontSize(11);
-      pdf.text(description, leftMargin + 3, y + 12);
-    }
-    if (tags && tags.length) {
-      let tagX = leftMargin + 3;
-      let tagY = y + 17;
-      pdf.setFontSize(10);
-      tags.forEach(tag => {
-        const tagWidth = pdf.getTextWidth(tag) + 6;
-        if (tagX + tagWidth > leftMargin + contentWidth - 3) {
-          tagX = leftMargin + 3;
-          tagY += 10;
-        }
-        pdf.setFillColor(220, 220, 220);
-        pdf.roundedRect(tagX, tagY - 5, tagWidth, 7, 2, 2, 'F');
-        pdf.text(tag, tagX + 3, tagY);
-        tagX += tagWidth + 2;
-      });
-    }
-    y = cardTop + cardHeight + cardSpacing;
+    pdf.setFontSize(11);
+    pdf.text(text, x, y);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(11);
   }
 
-  // Render sections in order
-  (resume.sectionOrder || [
-    'personalInfo', 'summary', 'education', 'experience', 'skills', 'projects'
-  ]).forEach(section => {
-    if (y > pageHeight - 35) {
-      pdf.addPage();
-      y = 25;
-    }
-    switch (section) {
-      case 'personalInfo': {
-        pdf.setFontSize(18);
-        pdf.setFont('helvetica', 'bold');
-        pdf.text(resume.personalInfo.fullName || '', pageWidth / 2, y, { align: 'center' });
-        y += lineHeight;
-        pdf.setFontSize(10);
+  // LEFT COLUMN (main content, page 1 only)
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(24);
+  pdf.text(resume.personalInfo.fullName || '', leftX, y);
+  y += 11;
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(13);
+  if (resume.personalInfo.title) {
+    pdf.text(resume.personalInfo.title, leftX, y);
+    y += 8;
+  }
+  if (resume.summary) {
+    addSectionHeader('Profile');
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(11);
+    const summaryLines = pdf.splitTextToSize(resume.summary, leftColWidth);
+    pdf.text(summaryLines, leftX, y);
+    y += lineHeight * summaryLines.length - 8;
+  }
+  if (resume.education && resume.education.length) {
+    addSectionHeader('Education');
+    resume.education.forEach(edu => {
+      addSubHeader(edu.institution, leftX, y);
+      y += lineHeight - 1.5;
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(10);
+      pdf.text(`${edu.startDate} - ${edu.endDate}`, leftX, y);
+      y += lineHeight - 2.5;
+      pdf.text(`${edu.degree} - ${edu.fieldOfStudy}`, leftX, y);
+      y += lineHeight - 1.5;
+      if (edu.description) {
+        const eduDescLines = pdf.splitTextToSize(edu.description, leftColWidth);
+        pdf.text(eduDescLines, leftX, y);
+        y += lineHeight * eduDescLines.length - 1000;
+      }
+      y += subSectionSpacing;
+    });
+    y += sectionSpacing;
+  }
+  // RIGHT COLUMN (sidebar, page 1 only)
+  let yRight = 22;
+  if (resume.personalInfo.address) {
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(10);
+    const addressLines = pdf.splitTextToSize(resume.personalInfo.address, rightColWidth);
+    pdf.text(addressLines, rightX, yRight);
+    yRight += lineHeight * addressLines.length;
+  }
+  if (resume.personalInfo.city) {
+    const cityLines = pdf.splitTextToSize(resume.personalInfo.city, rightColWidth);
+    pdf.text(cityLines, rightX, yRight);
+    yRight += lineHeight * cityLines.length;
+  }
+  if (resume.personalInfo.phone) {
+    pdf.setFont('helvetica', 'bold');
+    pdf.text(resume.personalInfo.phone, rightX, yRight, { maxWidth: rightColWidth });
+    yRight += lineHeight - 2.5;
+  }
+  if (resume.personalInfo.email) {
+    addLink('Contact via Email', `mailto:${resume.personalInfo.email}`, rightX, yRight);
+    yRight += lineHeight - 2.5;
+  }
+  if (resume.personalInfo.portfolio) {
+    addLink('Portfolio', resume.personalInfo.portfolio, rightX, yRight);
+    yRight += lineHeight - 2.5;
+  }
+  yRight += sectionSpacing + 2;
+  if (resume.skills && resume.skills.length) {
+    addSectionHeader('Skills', 'right');
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(10);
+    let skillsY = yRight;
+    resume.skills.forEach(skill => {
+      const skillLines = pdf.splitTextToSize(skill, rightColWidth);
+      pdf.text(skillLines, rightX, skillsY);
+      skillsY += lineHeight * skillLines.length;
+    });
+    yRight = skillsY + sectionSpacing;
+  }
+  if (resume.certificates && resume.certificates.length) {
+    addSectionHeader('Certificates', 'right');
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(10);
+    let certY = yRight;
+    resume.certificates.forEach(cert => {
+      pdf.text(cert, rightX, certY, { maxWidth: rightColWidth });
+      certY += lineHeight - 3.5;
+    });
+    yRight = certY + sectionSpacing;
+  }
+  // PROJECTS SECTION: Start on current page if space, otherwise add page as needed
+  if (resume.projects && resume.projects.length) {
+    // Only add the section header if at least one project fits on the current page
+    let projectsHeaderAdded = false;
+    resume.projects.forEach((project, idx) => {
+      // Estimate height for this project
+      let projLines = 1; // name
+      if (project.technologies && project.technologies.length) {
+        const techLine = `Tech Used - ${project.technologies.join(', ')}`;
+        projLines += pdf.splitTextToSize(techLine, leftColWidth).length;
+      }
+      if (project.link) projLines += 1;
+      if (project.description) projLines += pdf.splitTextToSize(project.description, leftColWidth).length;
+      const projHeight = lineHeight * projLines + subSectionSpacing;
+      // If not enough space for this project, add a new page
+      if (y + projHeight > pageHeight - 18) {
+        pdf.addPage();
+        y = 22;
+        projectsHeaderAdded = false; // Need to re-add header on new page
+      }
+      if (!projectsHeaderAdded) {
+        addSectionHeader('Projects');
+        projectsHeaderAdded = true;
+      }
+      addSubHeader(project.name, leftX, y);
+      y += lineHeight - 1.5;
+      if (project.technologies && project.technologies.length) {
         pdf.setFont('helvetica', 'normal');
-        let infoLine = [
-          resume.personalInfo.email,
-          resume.personalInfo.phone,
-          resume.personalInfo.address
-        ].filter(Boolean).join('   ');
-        if (infoLine) {
-          pdf.text(infoLine, pageWidth / 2, y, { align: 'center' });
-          y += lineHeight - 2;
-        }
-        let linksLine = [
-          resume.personalInfo.linkedIn,
-          resume.personalInfo.github,
-          resume.personalInfo.portfolio
-        ].filter(Boolean).join('   ');
-        if (linksLine) {
-          pdf.setTextColor(41, 128, 185);
-          pdf.text(linksLine, pageWidth / 2, y, { align: 'center' });
-          pdf.setTextColor(0, 0, 0);
-          y += lineHeight - 2;
-        }
-        y += sectionSpacing;
-        break;
+        pdf.setFontSize(10);
+        const techLine = `Tech Used - ${project.technologies.join(', ')}`;
+        const techLines = pdf.splitTextToSize(techLine, leftColWidth);
+        pdf.text(techLines, leftX, y);
+        y += lineHeight * techLines.length;
       }
-      case 'summary': {
-        if (resume.summary) {
-          addSectionTitle('Summary');
-          pdf.text(resume.summary, leftMargin, y, { maxWidth: contentWidth });
-          y += lineHeight + 2;
-          y += bottomPadding; // Add bottom padding after summary description
-        }
-        break;
+      if (project.link) {
+        addLink(project.link, project.link, leftX, y);
+        y += lineHeight - 2;
       }
-      case 'education': {
-        if (resume.education && resume.education.length) {
-          y += 6; // Extra space before Education section
-          addSectionTitle('Education');
-          resume.education.forEach((edu, idx) => {
-            addCard({
-              title: edu.institution,
-              subtitle: `${edu.degree} in ${edu.fieldOfStudy}  ${edu.startDate} - ${edu.endDate}`,
-              description: edu.description,
-              tags: edu.gpa ? [`GPA: ${edu.gpa}`] : []
-            });
-            // Add bottomPadding only after the last card
-            if (idx === resume.education.length - 1) {
-              y += bottomPadding;
-            }
-          });
-          y += sectionSpacing;
-        }
-        break;
+      if (project.description) {
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(10);
+        const projDescLines = pdf.splitTextToSize(project.description, leftColWidth);
+        pdf.text(projDescLines, leftX, y);
+        y += lineHeight * projDescLines.length;
       }
-      case 'experience': {
-        if (resume.experience && resume.experience.length) {
-          addSectionTitle('Experience');
-          resume.experience.forEach((exp, idx) => {
-            addCard({
-              title: exp.company,
-              subtitle: `${exp.position}  ${exp.startDate} - ${exp.endDate}`,
-              description: exp.description
-            });
-            // Add bottomPadding only after the last card
-            if (idx === resume.experience.length - 1) {
-              y += bottomPadding;
-            }
-          });
-          y += sectionSpacing;
-        }
-        break;
-      }
-      case 'skills': {
-        if (resume.skills && resume.skills.length) {
-          addSectionTitle('Skills');
-          y += 4; // Extra space after the underline before skills tags
-          let tagX = leftMargin;
-          let tagY = y + 2;
-          pdf.setFontSize(10);
-          resume.skills.forEach(skill => {
-            const tagWidth = pdf.getTextWidth(skill) + 6;
-            if (tagX + tagWidth > pageWidth - rightMargin) {
-              tagX = leftMargin;
-              tagY += 10;
-            }
-            pdf.setFillColor(220, 220, 220);
-            pdf.roundedRect(tagX, tagY - 5, tagWidth, 7, 2, 2, 'F');
-            pdf.text(skill, tagX + 3, tagY);
-            tagX += tagWidth + 2;
-          });
-          y = tagY + 10;
-          y += sectionSpacing;
-        }
-        break;
-      }
-      case 'projects': {
-        if (resume.projects && resume.projects.length) {
-          // Calculate total height needed for heading + all cards
-          let projY = y;
-          let totalHeight = 0;
-          // Heading height
-          totalHeight += 15; // heading + underline + spacing
-          resume.projects.forEach(project => {
-            let cardHeight = 18 + (project.description ? 7 : 0);
-            // Calculate tag lines and height
-            let tagLines = 0;
-            if (project.technologies && project.technologies.length) {
-              let tagX = leftMargin + 3;
-              tagLines = 1;
-              project.technologies.forEach(tag => {
-                const tagWidth = pdf.getTextWidth(tag) + 6;
-                if (tagX + tagWidth > leftMargin + contentWidth - 3) {
-                  tagX = leftMargin + 3;
-                  tagLines++;
-                }
-                tagX += tagWidth + 2;
-              });
-              cardHeight += tagLines * 10;
-            }
-            totalHeight += cardHeight + cardSpacing;
-          });
-          if (projY + totalHeight > pageHeight - 25) {
-            pdf.addPage();
-            y = 25;
-          }
-          addSectionTitle('Projects');
-          resume.projects.forEach((project, idx) => {
-            addCard({
-              title: project.name,
-              subtitle: project.description,
-              description: project.link,
-              tags: project.technologies
-            });
-            // Add bottomPadding only after the last card
-            if (idx === resume.projects.length - 1) {
-              y += bottomPadding;
-            }
-          });
-          y += sectionSpacing;
-        }
-        break;
-      }
-      default:
-        break;
-    }
-  });
+      y += subSectionSpacing;
+    });
+    y += sectionSpacing;
+  }
 
   pdf.save(`${settings.fileName || resume.name || 'resume'}.pdf`);
 };
