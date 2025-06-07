@@ -6,35 +6,43 @@ export const exportToPDF = async (elementId, settings) => {
   if (!element) return;
 
   const originalStyles = {
+    position: element.style.position,
     overflow: element.style.overflow,
-    height: element.style.height
+    height: element.style.height,
+    width: element.style.width,
   };
-  
-  element.style.overflow = 'visible';
-  element.style.height = 'auto';
+
+  element.style.position = "absolute";
+  element.style.overflow = "visible";
+  element.style.height = "auto";
+  element.style.width = "800px";
 
   const canvas = await html2canvas(element, {
-    scale: 2,
+    scale: 1,
     logging: false,
     useCORS: true,
-    allowTaint: true,
-    backgroundColor: null,
+    scrollX: 0,
+    scrollY: 0,
+    windowWidth: element.scrollWidth,
+    windowHeight: element.scrollHeight,
+    letterRendering: true,
   });
 
-  element.style.overflow = originalStyles.overflow;
-  element.style.height = originalStyles.height;
+  Object.assign(element.style, originalStyles);
 
-  const imgData = canvas.toDataURL("image/png", 1.0);
   const pdf = new jsPDF({
     orientation: settings.orientation || "portrait",
     unit: "mm",
     format: settings.format || "a4",
   });
 
-  const imgProps = pdf.getImageProperties(imgData);
-  const pdfWidth = pdf.internal.pageSize.getWidth();
-  const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+  const imgWidth = 190; // mm (A4 width - margins)
+  const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-  pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+  // const imgProps = pdf.getImageProperties(imgData);
+  // const pdfWidth = pdf.internal.pageSize.getWidth();
+  // const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+  pdf.addImage(canvas, "PNG", 10, 10, imgWidth, imgHeight);
   pdf.save(`${settings.fileName || "resume"}.pdf`);
 };

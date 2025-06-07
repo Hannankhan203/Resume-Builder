@@ -12,7 +12,7 @@ export const ResumePreview = () => {
         return <TemplateTwo />;
       default:
         return (
-          <div className="resume-template template1">
+          <div className="resume-template template1" style={{ width: '800px' }}>
             <header className="resume-header">
               <h1>{activeResume.personalInfo.fullName}</h1>
               <div className="contact-info">
