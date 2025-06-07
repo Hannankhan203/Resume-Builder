@@ -100,9 +100,10 @@ export const exportToPDFjsPDFOnly = (resume, settings = {}) => {
   const rightMargin = 20;
   const contentWidth = pageWidth - leftMargin - rightMargin;
   const lineHeight = 8;
-  const sectionSpacing = 8;
+  const sectionSpacing = 10;
   const cardSpacing = 2;
-  const underlineSpacing = 4; // Space after section underline before content
+  const underlineSpacing = 6; // Space after section underline before content
+  const bottomPadding = 5;
 
   // Helper: Add section title
   function addSectionTitle(title) {
@@ -230,6 +231,7 @@ export const exportToPDFjsPDFOnly = (resume, settings = {}) => {
           addSectionTitle('Summary');
           pdf.text(resume.summary, leftMargin, y, { maxWidth: contentWidth });
           y += lineHeight + 2;
+          y += bottomPadding; // Add bottom padding after summary description
         }
         break;
       }
@@ -237,13 +239,17 @@ export const exportToPDFjsPDFOnly = (resume, settings = {}) => {
         if (resume.education && resume.education.length) {
           y += 6; // Extra space before Education section
           addSectionTitle('Education');
-          resume.education.forEach(edu => {
+          resume.education.forEach((edu, idx) => {
             addCard({
               title: edu.institution,
               subtitle: `${edu.degree} in ${edu.fieldOfStudy}  ${edu.startDate} - ${edu.endDate}`,
               description: edu.description,
               tags: edu.gpa ? [`GPA: ${edu.gpa}`] : []
             });
+            // Add bottomPadding only after the last card
+            if (idx === resume.education.length - 1) {
+              y += bottomPadding;
+            }
           });
           y += sectionSpacing;
         }
@@ -252,12 +258,16 @@ export const exportToPDFjsPDFOnly = (resume, settings = {}) => {
       case 'experience': {
         if (resume.experience && resume.experience.length) {
           addSectionTitle('Experience');
-          resume.experience.forEach(exp => {
+          resume.experience.forEach((exp, idx) => {
             addCard({
               title: exp.company,
               subtitle: `${exp.position}  ${exp.startDate} - ${exp.endDate}`,
               description: exp.description
             });
+            // Add bottomPadding only after the last card
+            if (idx === resume.experience.length - 1) {
+              y += bottomPadding;
+            }
           });
           y += sectionSpacing;
         }
@@ -317,13 +327,17 @@ export const exportToPDFjsPDFOnly = (resume, settings = {}) => {
             y = 25;
           }
           addSectionTitle('Projects');
-          resume.projects.forEach(project => {
+          resume.projects.forEach((project, idx) => {
             addCard({
               title: project.name,
               subtitle: project.description,
               description: project.link,
               tags: project.technologies
             });
+            // Add bottomPadding only after the last card
+            if (idx === resume.projects.length - 1) {
+              y += bottomPadding;
+            }
           });
           y += sectionSpacing;
         }
