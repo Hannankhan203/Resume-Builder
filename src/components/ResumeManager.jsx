@@ -5,7 +5,6 @@ export const ResumeManager = () => {
   const {
     resumes,
     activeResumeId,
-    activeResume,
     setActiveResumeId,
     createNewResume,
     updateResume,
