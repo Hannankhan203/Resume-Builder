@@ -55,6 +55,8 @@ main {
 
 .form-group {
   margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
 }
 
 .form-group label {
@@ -65,10 +67,10 @@ main {
 
 .form-group input,
 .form-group textarea {
-  width: 100%;
   padding: 8px;
-  border: 1px solid #ddd;
+  border: 2px solid #ddd;
   border-radius: 4px;
+  /* border: 2px solid black; */
 }
 
 .form-group textarea {
@@ -137,7 +139,7 @@ button:hover {
 }
 
 .resume-template {
-   width: 110mm;
+  width: 110mm;
   padding-right: 20mm;
   margin: 0 auto;
   background: white;
@@ -151,7 +153,8 @@ button:hover {
   margin-bottom: 8pt;
 }
 
-ul, ol {
+ul,
+ol {
   padding-left: 15pt;
   margin: 4pt 0;
 }
@@ -159,7 +162,6 @@ ul, ol {
 p {
   margin: 4pt 0;
 }
-
 
 .resume-template h1 {
   font-size: 28px;
@@ -784,4 +786,347 @@ p {
 .export-btn:hover,
 .import-btn:hover {
   background-color: #2980b9;
+}
+
+@media screen and (max-width: 768px) {
+  .app {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    font-family: "Arial", sans-serif;
+  }
+
+  .app-header {
+    background-color: #282c34;
+    padding: 20px;
+    color: white;
+    text-align: center;
+  }
+
+  main {
+    display: flex;
+    flex: 1;
+    padding: 20px;
+    gap: 20px;
+    flex-direction: column;
+  }
+
+  .editor {
+    flex: 1;
+    padding: 20px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    overflow-y: auto;
+    max-height: calc(100vh - 120px);
+  }
+
+  .preview {
+    flex: 1;
+    padding: 20px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow-y: auto;
+    max-height: calc(100vh - 120px);
+  }
+
+  .form-section {
+    margin-bottom: 30px;
+    padding: 15px;
+    background: white;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+
+  .form-group {
+    margin-bottom: 15px;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+
+  .form-group input,
+  .form-group textarea {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+
+  .form-group textarea {
+    min-height: 80px;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 15px;
+    flex-direction: column;
+  }
+
+  .form-row .form-group {
+    flex: 1;
+  }
+
+  button {
+    padding: 8px 15px;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background-color: #45a049;
+  }
+
+  .remove-btn {
+    background-color: #f44336;
+    margin-top: 10px;
+  }
+
+  .remove-btn:hover {
+    background-color: #d32f2f;
+  }
+
+  .education-entry,
+  .experience-entry,
+  .project-entry {
+    padding: 15px;
+    margin-bottom: 20px;
+    background: #f9f9f9;
+    border-radius: 5px;
+    border-left: 3px solid #4caf50;
+  }
+
+  .resume-template {
+    width: 100%;
+    max-width: 800px;
+    padding: 20px;
+    margin: 0 auto;
+    background: white;
+    color: black;
+    box-sizing: border-box;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .resume-section {
+    margin-bottom: 20px;
+  }
+
+  .resume-template h1 {
+    font-size: 24px;
+  }
+
+  .resume-template h2 {
+    font-size: 18px;
+  }
+
+  .resume-header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .contact-info {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+    font-size: 14px;
+  }
+
+  .section-item {
+    margin-bottom: 15px;
+  }
+
+  .section-header {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 5px;
+  }
+
+  .date-range {
+    font-style: italic;
+    color: #555;
+  }
+
+  .skills-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .skill-tag {
+    background: #e0e0e0;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 13px;
+  }
+
+  .resume-manager {
+    background: white;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+  }
+
+  .resume-list {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+  }
+
+  .resume-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 10px;
+    margin-bottom: 5px;
+    background: #f5f5f5;
+    border-radius: 3px;
+  }
+
+  .delete-btn {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    padding: 2px 8px;
+    font-size: 12px;
+  }
+
+  .save-section {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    flex-direction: column;
+  }
+
+  .save-section input {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+
+  .section-order {
+    background: white;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+  }
+
+  .template-options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 10px;
+  }
+
+  .template-option {
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .dark-mode {
+    background-color: #1a1a1a;
+    color: #ffffff;
+  }
+
+  .dark-mode .editor {
+    background-color: #2d2d2d;
+  }
+
+  .dark-mode .form-section {
+    background-color: #333;
+    color: #fff;
+  }
+
+  .dark-mode .form-group input {
+    background-color: #444;
+    color: #fff;
+  }
+
+  .resume-preview-container {
+    height: 100%;
+    overflow-y: auto;
+  }
+
+  .preview-controls {
+    padding: 10px;
+    background: #f5f5f5;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .pdf-export-button {
+    padding: 10px 20px;
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 4px;
+  }
+
+  .resume-item-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .duplicate-btn {
+    padding: 4px 8px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 3px;
+  }
+
+  .import-export {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-direction: column;
+  }
+
+  @media (min-width: 768px) {
+    main {
+      flex-direction: row;
+    }
+
+    .form-row {
+      flex-direction: row;
+    }
+
+    .save-section {
+      flex-direction: row;
+    }
+
+    .template-options {
+      flex-direction: row;
+    }
+
+    .import-export {
+      flex-direction: row;
+    }
+  }
+
+  @media (min-width: 992px) {
+    .resume-template {
+      padding: 40px;
+    }
+
+    .section-header {
+      flex-direction: row;
+    }
+  }
 }
