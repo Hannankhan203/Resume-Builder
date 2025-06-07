@@ -2,7 +2,7 @@
 
 A modern, feature-rich web application for creating, customizing, and exporting professional resumes. Instantly preview your changes, choose from multiple templates, and export your resume as a PDF or JSON file.
 
-🌐 **Live Demo:** [https://resume-builder-203.netlify.app/](https://resume-builder-203.netlify.app/)
+🌐 **Live Demo:** [https://resume-builder-203.netlify.app/](Resume Builder)
 
 ---
 
