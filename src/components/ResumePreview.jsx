@@ -99,6 +99,29 @@ export const ResumePreview = () => {
                 </div>
               </section>
             )}
+
+            {activeResume.projects.length > 0 && (
+              <section className="resume-section">
+                <h2>Projects</h2>
+                {activeResume.projects.map((project) => (
+                  <div key={project.id} className="section-item">
+                    <div className="section-header">
+                      <h3>{project.name}</h3>
+                    </div>
+                    {project.description && (
+                      <p className="section-content">{project.description}</p>
+                    )}
+                    {project.technologies && project.technologies.length > 0 && (
+                      <div className="skills-list">
+                        {project.technologies.map((tech, idx) => (
+                          <span key={idx} className="skill-tag">{tech}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </section>
+            )}
           </div>
         );
     }

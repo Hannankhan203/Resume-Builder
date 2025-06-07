@@ -1,6 +1,6 @@
 import React from "react";
 import { useResume } from "../contexts/ResumeContext";
-import { exportToPDF } from "../utils/pdfExporter";
+import { exportToPDF, exportToPDFjsPDFOnly } from "../utils/pdfExporter";
 
 const PDFExportButton = () => {
   const { activeResume } = useResume();
@@ -14,9 +14,14 @@ const PDFExportButton = () => {
   };
 
   return (
-    <button onClick={handleExport} className="pdf-export-button">
-      Export to PDF
-    </button>
+    <>
+      <button onClick={handleExport} className="pdf-export-button">
+        Export to PDF (Image)
+      </button>
+      <button onClick={() => exportToPDFjsPDFOnly(activeResume)} className="pdf-export-button">
+        Export to PDF (jsPDF Only)
+      </button>
+    </>
   );
 };
 
