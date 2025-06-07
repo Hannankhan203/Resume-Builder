@@ -218,3 +218,236 @@ export const exportToPDFjsPDFOnly = (resume, settings = {}) => {
 
   pdf.save(`${settings.fileName || resume.name || 'resume'}.pdf`);
 };
+
+export const exportToPDFClassic = (resume, settings = {}) => {
+  const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const leftX = 18;
+  const Leftx = 105;
+  let y1 = 16;
+  let y2 = 20;
+  let y3 = 24;
+  const contentWidth = pageWidth - 2 * leftX;
+  let y = 22;
+  const lineHeight = 6;
+  const sectionSpacing = 4;
+  const subSectionSpacing = 2;
+  const pageHeight = pdf.internal.pageSize.getHeight();
+  const bottomMargin = 18;
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(24);
+  pdf.text(resume.personalInfo.fullName || '', leftX, y);
+  y += 8;
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(12);
+  // Contact info
+  let contactInfo = [];
+  if (resume.personalInfo.email) contactInfo.push(resume.personalInfo.email);
+  if (resume.personalInfo.phone) contactInfo.push(resume.personalInfo.phone);
+  if (resume.personalInfo.address) contactInfo.push(resume.personalInfo.address);
+  if (contactInfo.length) {
+    pdf.setFontSize(10);
+    pdf.setTextColor(80, 80, 80);
+    const contactLines = pdf.splitTextToSize(contactInfo.join(' | '), contentWidth);
+    pdf.text(contactLines, leftX, y);
+    y += lineHeight * contactLines.length - 20;
+    pdf.setTextColor(0, 0, 0);
+  }
+  // Add blue clickable links for Portfolio, GitHub, LinkedIn
+  function addLink(text, url, x, y) {
+    pdf.setTextColor(41, 76, 139);
+    pdf.textWithLink(text, x, y, { url });
+    pdf.setTextColor(0, 0, 0);
+  }
+  if (resume.personalInfo.portfolio) {
+    addLink('Portfolio', resume.personalInfo.portfolio, Leftx, y1);
+    y += lineHeight - 2;
+  }
+  if (resume.personalInfo.github) {
+    addLink('GitHub', resume.personalInfo.github, Leftx, y2);
+    y += lineHeight - 2;
+  }
+  if (resume.personalInfo.linkedIn) {
+    addLink('LinkedIn', resume.personalInfo.linkedIn, Leftx, y3);
+    y += lineHeight + 1;
+  }
+  // Ensure y is set after the last link
+  const lastLinkY = Math.max(y, y1, y2, y3);
+  y = lastLinkY + lineHeight;
+  // Summary
+  if (resume.summary) {
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(14);
+    pdf.text('Summary', leftX, y);
+    y += lineHeight;
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(11);
+    const summaryLines = pdf.splitTextToSize(resume.summary, contentWidth);
+    pdf.text(summaryLines, leftX, y);
+    y += lineHeight * summaryLines.length - 6;
+    y += sectionSpacing;
+  }
+  // Experience
+  if (resume.experience && resume.experience.length) {
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(14);
+    pdf.text('Experience', leftX, y);
+    y += lineHeight;
+    resume.experience.forEach(exp => {
+      // Estimate height for this experience entry
+      let expLines = 1; // company
+      if (exp.startDate || exp.endDate) expLines += 1;
+      if (exp.position) expLines += 1;
+      if (exp.description) expLines += pdf.splitTextToSize(exp.description, contentWidth).length;
+      const expHeight = lineHeight * expLines + sectionSpacing;
+      if (y + expHeight > pageHeight - bottomMargin) {
+        pdf.addPage();
+        y = 22;
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(14);
+        pdf.text('Experience', leftX, y);
+        y += lineHeight;
+      }
+      // Company Name
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(12);
+      pdf.text(exp.company, leftX, y);
+      y += lineHeight - 1;
+      // Date
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(10);
+      if (exp.startDate || exp.endDate) {
+        pdf.text(`${exp.startDate} - ${exp.endDate}`, leftX, y);
+        y += lineHeight - 2;
+      }
+      // Position
+      if (exp.position) {
+        pdf.setFont('helvetica', 'italic');
+        pdf.setFontSize(10);
+        pdf.text(exp.position, leftX, y);
+        y += lineHeight - 1;
+      }
+      // Description
+      if (exp.description) {
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(10);
+        const expDescLines = pdf.splitTextToSize(exp.description, contentWidth);
+        pdf.text(expDescLines, leftX, y);
+        y += lineHeight * expDescLines.length;
+      }
+      y += sectionSpacing;
+    });
+  }
+  // Education
+  if (resume.education && resume.education.length) {
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(14);
+    pdf.text('Education', leftX, y);
+    y += lineHeight;
+    resume.education.forEach(edu => {
+      // Estimate height for this education entry
+      let eduLines = 1; // institution
+      if (edu.startDate || edu.endDate) eduLines += 1;
+      if (edu.degree || edu.fieldOfStudy) eduLines += 1;
+      if (edu.description) eduLines += pdf.splitTextToSize(edu.description, contentWidth).length;
+      const eduHeight = lineHeight * eduLines + sectionSpacing;
+      if (y + eduHeight > pageHeight - bottomMargin) {
+        pdf.addPage();
+        y = 22;
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(14);
+        pdf.text('Education', leftX, y);
+        y += lineHeight;
+      }
+      // Institution Name
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(12);
+      pdf.text(edu.institution, leftX, y);
+      y += lineHeight - 1;
+      // Date
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(10);
+      if (edu.startDate || edu.endDate) {
+        pdf.text(`${edu.startDate} - ${edu.endDate}`, leftX, y);
+        y += lineHeight - 2;
+      }
+      // Degree/Field
+      if (edu.degree || edu.fieldOfStudy) {
+        pdf.setFont('helvetica', 'italic');
+        pdf.setFontSize(10);
+        pdf.text(`${edu.degree} in ${edu.fieldOfStudy}`, leftX, y);
+        y += lineHeight - 4;
+      }
+      // Description
+      if (edu.description) {
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(10);
+        const eduDescLines = pdf.splitTextToSize(edu.description, contentWidth);
+        pdf.text(eduDescLines, leftX, y);
+        y += lineHeight * eduDescLines.length;
+      }
+      y += sectionSpacing;
+    });
+  }
+  // Skills
+  if (resume.skills && resume.skills.length) {
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(14);
+    pdf.text('Skills', leftX, y);
+    y += lineHeight;
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(11);
+    const skillsLine = resume.skills.join(', ');
+    pdf.text(skillsLine, leftX, y, { maxWidth: contentWidth });
+    y += lineHeight * skillsLine.length - 10;
+    y += sectionSpacing;
+  }
+  // Projects
+  if (resume.projects && resume.projects.length) {
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(14);
+    pdf.text('Projects', leftX, y);
+    y += lineHeight;
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(11);
+    resume.projects.forEach(project => {
+      // Estimate height for this project entry
+      let projLines = 1; // name
+      if (project.technologies && project.technologies.length) projLines += 1;
+      if (project.description) projLines += pdf.splitTextToSize(project.description, contentWidth).length;
+      if (project.link) projLines += 1;
+      const projHeight = lineHeight * projLines + subSectionSpacing;
+      if (y + projHeight > pageHeight - bottomMargin) {
+        pdf.addPage();
+        y = 22;
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(14);
+        pdf.text('Projects', leftX, y);
+        y += lineHeight;
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(11);
+      }
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(project.name, leftX, y);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(10);
+      y += lineHeight - 2;
+      if (project.technologies && project.technologies.length) {
+        pdf.text(`Tech Used: ${project.technologies.join(', ')}`, leftX, y);
+        y += lineHeight - 2;
+      }
+      if (project.description) {
+        const projDescLines = pdf.splitTextToSize(project.description, contentWidth);
+        pdf.text(projDescLines, leftX, y);
+        y += lineHeight * projDescLines.length;
+      }
+      if (project.link) {
+        pdf.text(project.link, leftX, y);
+        y += lineHeight - 2;
+      }
+      y += subSectionSpacing;
+    });
+    y += sectionSpacing;
+  }
+  pdf.save(`${settings.fileName || resume.name || 'resume'}.pdf`);
+};

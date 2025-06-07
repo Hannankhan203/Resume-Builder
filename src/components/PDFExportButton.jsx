@@ -1,13 +1,21 @@
 import React from "react";
 import { useResume } from "../contexts/ResumeContext";
-import { exportToPDFjsPDFOnly } from "../utils/pdfExporter";
+import { exportToPDFjsPDFOnly, exportToPDFClassic } from "../utils/pdfExporter";
 
 const PDFExportButton = () => {
   const { activeResume } = useResume();
 
+  const handleExport = () => {
+    if (activeResume.template === "template2") {
+      exportToPDFjsPDFOnly(activeResume);
+    } else {
+      exportToPDFClassic(activeResume);
+    }
+  };
+
   return (
     <>
-      <button onClick={() => exportToPDFjsPDFOnly(activeResume)} className="pdf-export-button">
+      <button onClick={handleExport} className="pdf-export-button">
         Export to PDF
       </button>
     </>
