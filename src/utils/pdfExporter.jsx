@@ -53,7 +53,7 @@ export const exportToPDF = async (elementId, settings) => {
     // Multi-page support
     const pageHeight = pdf.internal.pageSize.getHeight();
     let remainingHeight = imgHeight;
-    let position = 0;
+    // let position = 0;
     let pageNum = 0;
     while (remainingHeight > 0) {
       if (pageNum > 0) pdf.addPage();
@@ -127,7 +127,7 @@ export const exportToPDFjsPDFOnly = (resume, settings = {}) => {
     let tagLines = 0;
     if (tags && tags.length) {
       let tagX = leftMargin + 3;
-      let tagY = 0;
+      // let tagY = 0;
       tagLines = 1;
       tags.forEach(tag => {
         const tagWidth = pdf.getTextWidth(tag) + 6;
