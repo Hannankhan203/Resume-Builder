@@ -5,22 +5,39 @@ export const exportToPDF = async (elementId, settings) => {
   const element = document.getElementById(elementId);
   if (!element) return;
 
-  // Create a clean clone
+  // Create a print-optimized clone with exact dimensions
   const clone = element.cloneNode(true);
   clone.id = "pdf-export-clone";
-  clone.style.width = "700px"; // Reduced from 800px to fit better
-  clone.style.padding = "20px";
-  clone.style.boxSizing = "border-box";
-  clone.style.background = "#ffffff";
+
+  // Apply compact styling
+  clone.style.cssText = `
+    position: absolute;
+    left: px;
+    width: 110mm; 
+    min-height: auto;
+    padding-right: 20mm;
+    margin: 0;
+    background: white;
+    color: black;
+    box-sizing: border-box;
+    font-size: 11pt;
+    line-height: 1;
+  `;
+
   document.body.appendChild(clone);
 
   try {
     const canvas = await html2canvas(clone, {
       scale: 2,
-      windowWidth: 700, // Match the clone width
+      width: clone.scrollWidth,
+      height: clone.scrollHeight,
       logging: true,
       useCORS: true,
       backgroundColor: "#ffffff",
+      letterRendering: true,
+      onclone: (clonedDoc) => {
+        clonedDoc.body.style.background = "white";
+      },
     });
 
     const pdf = new jsPDF({
@@ -29,15 +46,15 @@ export const exportToPDF = async (elementId, settings) => {
       format: "a4",
     });
 
-    // Calculate dimensions with safer margins
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const margin = 5; // Reduced from 10mm to 5mm
-    const imgWidth = pageWidth - (margin * 2);
+    // Calculate dynamic height based on content
+    const imgWidth = 200; // mm
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-    // Center the content horizontally
-    pdf.addImage(canvas, "PNG", margin, 10, imgWidth, imgHeight);
-    
+    // Center content vertically if there's extra space
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const yPos = imgHeight < pageHeight ? (pageHeight - imgHeight) / 2 : 0;
+
+    pdf.addImage(canvas, "PNG", 10, yPos, imgWidth, imgHeight);
     pdf.save(`${settings.fileName || "resume"}.pdf`);
   } catch (error) {
     console.error("PDF generation error:", error);

@@ -8,8 +8,11 @@ export const TemplateTwo = () => {
     <div
       className="resume-template template2"
       style={{
-        backgroundColor: "white",
-        color: "black",
+        width: "595px",
+        backgroundColor: "#ffffff",
+        color: "#000000",
+        padding: "20px",
+        margin: "0 auto",
       }}
     >
       <header className="resume-header">
