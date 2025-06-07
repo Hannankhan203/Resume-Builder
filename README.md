@@ -1,70 +1,80 @@
-# Getting Started with Create React App
+# Resume Builder
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A modern, feature-rich web application for creating, customizing, and exporting professional resumes. Instantly preview your changes, choose from multiple templates, and export your resume as a PDF or JSON file.
 
-## Available Scripts
+🌐 **Live Demo:** [https://resume-builder-203.netlify.app/](https://resume-builder-203.netlify.app/)
 
-In the project directory, you can run:
+---
 
-### `npm start`
+## Features
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### Multiple Resume Templates
+Choose between "Classic" and "Modern" templates to best showcase your experience and skills.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### Drag-and-Drop Section Ordering
+Easily reorder resume sections (Personal Info, Summary, Education, Experience, Skills, Projects) to fit your needs.
 
-### `npm test`
+### Dark Mode
+Toggle between light and dark themes for comfortable editing.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Multi-Resume Management
+Create, duplicate, rename, and delete multiple resumes within the app.
 
-### `npm run build`
+### Import/Export
+- Export your resume data as a JSON file for backup or sharing
+- Import previously saved JSON files to continue editing
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### PDF Export
+Download a print-ready PDF of your resume with a single click.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Live Preview
+Instantly see your changes reflected in the resume preview pane.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+---
 
-### `npm run eject`
+## Usage
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### Add/Edit Resume Sections
+Fill out your personal information, summary, education, experience, skills, and projects using the provided forms.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Switch Templates
+Use the "Select Template" panel to toggle between available resume designs.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Reorder Sections
+Drag and drop sections in the "Section Order" panel to customize the layout.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### Export Options
+- Click "Export to PDF" to download your resume as a PDF
+- Use "Export JSON" to save your resume data
+- Use "Import JSON" to load a previously saved resume
 
-## Learn More
+### Manage Multiple Resumes
+Create new resumes, duplicate existing ones, or delete resumes as needed.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### Dark Mode
+Click the sun/moon icon in the header to toggle dark mode.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Tech Stack
+- **Frontend:** React (with Context API for state management)
+- **PDF Generation:** jsPDF, html2canvas
+- **Drag-and-Drop:** @hello-pangea/dnd
+- **Styling:** CSS
 
-### Code Splitting
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## Folder Structure
 
-### Analyzing the Bundle Size
+~~~bash
+resume-builder/
+├── public/
+├── src/
+│ ├── components/
+│ ├── contexts/
+│ ├── templates/
+│ ├── utils/
+│ ├── App.js
+│ └── index.js
+├── package.json
+└── README.md
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
 
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
