@@ -9,6 +9,7 @@ const PDFExportButton = () => {
     exportToPDF("resume-preview", {
       ...activeResume.pdfSettings,
       fileName: activeResume.pdfSettings.fileName || activeResume.name,
+      personalInfo: activeResume.personalInfo,
     });
   };
 

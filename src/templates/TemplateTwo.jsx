@@ -32,10 +32,13 @@ export const TemplateTwo = () => {
             <span>{activeResume.personalInfo.address}</span>
           )}
           {activeResume.personalInfo.linkedIn && (
-            <span>{activeResume.personalInfo.linkedIn}</span>
+            <span style={{cursor: 'pointer'}}>{activeResume.personalInfo.linkedIn}</span>
           )}
           {activeResume.personalInfo.github && (
-            <span>{activeResume.personalInfo.github}</span>
+            <span style={{cursor: 'pointer'}}>{activeResume.personalInfo.github}</span>
+          )}
+          {activeResume.personalInfo.portfolio && (
+            <span style={{cursor: 'pointer'}}>{activeResume.personalInfo.portfolio}</span>
           )}
         </div>
       </header>
