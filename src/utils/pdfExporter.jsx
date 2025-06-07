@@ -223,23 +223,26 @@ export const exportToPDFClassic = (resume, settings = {}) => {
   const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
   const pageWidth = pdf.internal.pageSize.getWidth();
   const leftX = 18;
-  const Leftx = 105;
-  let y1 = 16;
-  let y2 = 20;
-  let y3 = 24;
+  const Leftx1 = 135;
+  const Leftx2 = 150;
+  const Leftx3 = 165;
+  // let y1 = 16;
+  let y1 = 22;
+  // let y3 = 24;
   const contentWidth = pageWidth - 2 * leftX;
   let y = 22;
-  const lineHeight = 6;
-  const sectionSpacing = 4;
-  const subSectionSpacing = 2;
+  const lineHeight = 8;
+  const sectionSpacing = 6;
+  const subSectionSpacing = 4;
   const pageHeight = pdf.internal.pageSize.getHeight();
-  const bottomMargin = 18;
+  const bottomMargin = 20;
   pdf.setFont('helvetica', 'bold');
-  pdf.setFontSize(24);
+  pdf.setTextColor(0, 0, 255);
+  pdf.setFontSize(34);
   pdf.text(resume.personalInfo.fullName || '', leftX, y);
   y += 8;
   pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(12);
+  pdf.setFontSize(16);
   // Contact info
   let contactInfo = [];
   if (resume.personalInfo.email) contactInfo.push(resume.personalInfo.email);
@@ -247,51 +250,54 @@ export const exportToPDFClassic = (resume, settings = {}) => {
   if (resume.personalInfo.address) contactInfo.push(resume.personalInfo.address);
   if (contactInfo.length) {
     pdf.setFontSize(10);
-    pdf.setTextColor(80, 80, 80);
+    pdf.setTextColor(0, 0, 0);
     const contactLines = pdf.splitTextToSize(contactInfo.join(' | '), contentWidth);
     pdf.text(contactLines, leftX, y);
-    y += lineHeight * contactLines.length - 20;
-    pdf.setTextColor(0, 0, 0);
+    y += lineHeight * contactLines.length - 22;
   }
   // Add blue clickable links for Portfolio, GitHub, LinkedIn
   function addLink(text, url, x, y) {
-    pdf.setTextColor(41, 76, 139);
+    pdf.setTextColor(0, 0, 255);
     pdf.textWithLink(text, x, y, { url });
     pdf.setTextColor(0, 0, 0);
   }
   if (resume.personalInfo.portfolio) {
-    addLink('Portfolio', resume.personalInfo.portfolio, Leftx, y1);
+    addLink('Portfolio', resume.personalInfo.portfolio, Leftx1, y1);
     y += lineHeight - 2;
   }
   if (resume.personalInfo.github) {
-    addLink('GitHub', resume.personalInfo.github, Leftx, y2);
+    addLink('GitHub', resume.personalInfo.github, Leftx2, y1);
     y += lineHeight - 2;
   }
   if (resume.personalInfo.linkedIn) {
-    addLink('LinkedIn', resume.personalInfo.linkedIn, Leftx, y3);
+    addLink('LinkedIn', resume.personalInfo.linkedIn, Leftx3, y1);
     y += lineHeight + 1;
   }
   // Ensure y is set after the last link
-  const lastLinkY = Math.max(y, y1, y2, y3);
+  const lastLinkY = Math.max(y, y1, y1, y1);
   y = lastLinkY + lineHeight;
   // Summary
   if (resume.summary) {
     pdf.setFont('helvetica', 'bold');
-    pdf.setFontSize(14);
+    pdf.setFontSize(16);
+    pdf.setTextColor(0, 0, 255);
     pdf.text('Summary', leftX, y);
+    pdf.setTextColor(0, 0, 0);
     y += lineHeight;
     pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(11);
+    pdf.setFontSize(12);
     const summaryLines = pdf.splitTextToSize(resume.summary, contentWidth);
     pdf.text(summaryLines, leftX, y);
-    y += lineHeight * summaryLines.length - 6;
+    y += lineHeight * summaryLines.length - 10;
     y += sectionSpacing;
   }
   // Experience
   if (resume.experience && resume.experience.length) {
     pdf.setFont('helvetica', 'bold');
-    pdf.setFontSize(14);
+    pdf.setFontSize(16);
+    pdf.setTextColor(0, 0, 255);
     pdf.text('Experience', leftX, y);
+    pdf.setTextColor(0, 0, 0);
     y += lineHeight;
     resume.experience.forEach(exp => {
       // Estimate height for this experience entry
@@ -311,11 +317,13 @@ export const exportToPDFClassic = (resume, settings = {}) => {
       // Company Name
       pdf.setFont('helvetica', 'bold');
       pdf.setFontSize(12);
+      pdf.setTextColor(0, 0, 255);
       pdf.text(exp.company, leftX, y);
+      pdf.setTextColor(0, 0, 0);
       y += lineHeight - 1;
       // Date
       pdf.setFont('helvetica', 'normal');
-      pdf.setFontSize(10);
+      pdf.setFontSize(12);
       if (exp.startDate || exp.endDate) {
         pdf.text(`${exp.startDate} - ${exp.endDate}`, leftX, y);
         y += lineHeight - 2;
@@ -323,7 +331,7 @@ export const exportToPDFClassic = (resume, settings = {}) => {
       // Position
       if (exp.position) {
         pdf.setFont('helvetica', 'italic');
-        pdf.setFontSize(10);
+        pdf.setFontSize(12);
         pdf.text(exp.position, leftX, y);
         y += lineHeight - 1;
       }
@@ -341,8 +349,10 @@ export const exportToPDFClassic = (resume, settings = {}) => {
   // Education
   if (resume.education && resume.education.length) {
     pdf.setFont('helvetica', 'bold');
-    pdf.setFontSize(14);
+    pdf.setFontSize(16);
+    pdf.setTextColor(0, 0, 255);
     pdf.text('Education', leftX, y);
+    pdf.setTextColor(0, 0, 0);
     y += lineHeight;
     resume.education.forEach(edu => {
       // Estimate height for this education entry
@@ -361,12 +371,14 @@ export const exportToPDFClassic = (resume, settings = {}) => {
       }
       // Institution Name
       pdf.setFont('helvetica', 'bold');
-      pdf.setFontSize(12);
+      pdf.setFontSize(14);
+      pdf.setTextColor(0, 0, 255);
       pdf.text(edu.institution, leftX, y);
+      pdf.setTextColor(0, 0, 0);
       y += lineHeight - 1;
       // Date
       pdf.setFont('helvetica', 'normal');
-      pdf.setFontSize(10);
+      pdf.setFontSize(12);
       if (edu.startDate || edu.endDate) {
         pdf.text(`${edu.startDate} - ${edu.endDate}`, leftX, y);
         y += lineHeight - 2;
@@ -374,14 +386,14 @@ export const exportToPDFClassic = (resume, settings = {}) => {
       // Degree/Field
       if (edu.degree || edu.fieldOfStudy) {
         pdf.setFont('helvetica', 'italic');
-        pdf.setFontSize(10);
+        pdf.setFontSize(12);
         pdf.text(`${edu.degree} in ${edu.fieldOfStudy}`, leftX, y);
         y += lineHeight - 4;
       }
       // Description
       if (edu.description) {
         pdf.setFont('helvetica', 'normal');
-        pdf.setFontSize(10);
+        pdf.setFontSize(12);
         const eduDescLines = pdf.splitTextToSize(edu.description, contentWidth);
         pdf.text(eduDescLines, leftX, y);
         y += lineHeight * eduDescLines.length;
@@ -392,11 +404,13 @@ export const exportToPDFClassic = (resume, settings = {}) => {
   // Skills
   if (resume.skills && resume.skills.length) {
     pdf.setFont('helvetica', 'bold');
-    pdf.setFontSize(14);
+    pdf.setFontSize(16);
+    pdf.setTextColor(0, 0, 255);
     pdf.text('Skills', leftX, y);
+    pdf.setTextColor(0, 0, 0);
     y += lineHeight;
     pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(11);
+    pdf.setFontSize(12);
     const skillsLine = resume.skills.join(', ');
     pdf.text(skillsLine, leftX, y, { maxWidth: contentWidth });
     y += lineHeight * skillsLine.length - 10;
@@ -405,11 +419,13 @@ export const exportToPDFClassic = (resume, settings = {}) => {
   // Projects
   if (resume.projects && resume.projects.length) {
     pdf.setFont('helvetica', 'bold');
-    pdf.setFontSize(14);
+    pdf.setFontSize(16);
+    pdf.setTextColor(0, 0, 255);
     pdf.text('Projects', leftX, y);
+    pdf.setTextColor(0, 0, 0);
     y += lineHeight;
     pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(11);
+    pdf.setFontSize(12);
     resume.projects.forEach(project => {
       // Estimate height for this project entry
       let projLines = 1; // name
@@ -422,15 +438,19 @@ export const exportToPDFClassic = (resume, settings = {}) => {
         y = 22;
         pdf.setFont('helvetica', 'bold');
         pdf.setFontSize(14);
+        pdf.setTextColor(0, 0, 255);
         pdf.text('Projects', leftX, y);
+        pdf.setTextColor(0, 0, 0);
         y += lineHeight;
         pdf.setFont('helvetica', 'normal');
-        pdf.setFontSize(11);
+        pdf.setFontSize(12);
       }
       pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(0, 0, 255);
       pdf.text(project.name, leftX, y);
+      pdf.setTextColor(0, 0, 0);
       pdf.setFont('helvetica', 'normal');
-      pdf.setFontSize(10);
+      pdf.setFontSize(12);
       y += lineHeight - 2;
       if (project.technologies && project.technologies.length) {
         pdf.text(`Tech Used: ${project.technologies.join(', ')}`, leftX, y);
